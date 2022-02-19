@@ -76,6 +76,12 @@ otras_variables.pop(otras_variables.index("AÑO"))
 # plot, d = plot_anio(datos, opcion_y, "AÑO", opcion_anio)
 # st.plotly_chart(plot)
 # st.write(d)
+@st.cache
+def plot_dp(df, x, y,departamento):
+    data = df.copy()   
+    data = data[data["DEPARTAMENTO"] == departamento]
+    fig = px.line(data, x=x, y=y, title="MEDIA DE DESERCION EN PRIMARIA EN "+departamento.upper())
+    return fig, data
 
 @st.cache
 def plot_dt(df, x, y,departamento):
@@ -84,22 +90,20 @@ def plot_dt(df, x, y,departamento):
     fig = px.line(data, x=x, y=y, title="MEDIA DE DESERCION EN TRANSICION EN "+departamento.upper())
     return fig, data
 
-plot, d = plot_dt(datos_agrupados_departamento_dt, "AÑO", "DESERCIÓN_TRANSICIÓN", opcion_departamento)
-st.plotly_chart(plot)
+plot1, d = plot_dt(datos_agrupados_departamento_dt, "AÑO", "DESERCIÓN_TRANSICIÓN", opcion_departamento)
+plot2, d = plot_dp(datos_agrupados_departamento_dp, "AÑO", "DESERCIÓN_PRIMARIA", opcion_departamento)
+colum1,colum2 =st.columns(2)
+colum1.plotly_chart(plot1, use_container_width=True)
+colum2.plotly_chart(plot2, use_container_width=True)
 st.write(d)
 
 st.markdown("---")
 
-@st.cache
-def plot_dp(df, x, y,departamento):
-    data = df.copy()   
-    data = data[data["DEPARTAMENTO"] == departamento]
-    fig = px.line(data, x=x, y=y, title="MEDIA DE DESERCION EN PRIMARIA EN "+departamento.upper())
-    return fig, data
 
-plot, d = plot_dp(datos_agrupados_departamento_dp, "AÑO", "DESERCIÓN_PRIMARIA", opcion_departamento)
-st.plotly_chart(plot)
-st.write(d)
+
+
+
+
 
 st.markdown("---")
 
