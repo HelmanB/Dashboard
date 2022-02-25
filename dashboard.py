@@ -9,9 +9,10 @@ import plotly.graph_objects as go
 st.set_page_config(layout="wide")
 
 st.header("DASHBOARD")
-st.sidebar.header("ESTADISTICA DE EDUCACION POR DEPARTAMENTO")
+st.sidebar.header("ESTADISTICA DE EDUCACION EN COLOMBIA POR DEPARTAMENTO")
 st.sidebar.markdown("---")
-st.markdown("# TABLA Y GRAFICOS")
+st.markdown("# APARTADO DE GRAFICAS Y TABLAS")
+
 servidor = 'http://ec2-44-198-126-182.compute-1.amazonaws.com'
 
 @st.cache
@@ -104,6 +105,19 @@ opcion_departamento = st.sidebar.selectbox(
     label="Seleccione un departamento", options=lista_departamentos
 )
 
+opciones = ["Desercion",
+            "Comparacion entre cobertura neta y T.de matriculacion", 
+            "Evolución de cobertura y tasa de matriculación",
+            "Sedes conectadas a internet por departamento"]
+
+radio_button_grafica = st.sidebar.radio(
+    label="Ver graficas", options=opciones
+)
+
+# if radio_button == "Mostrar":
+#     st.dataframe(datos)
+
+
 
 st.markdown("---")
 
@@ -134,98 +148,103 @@ def plot_dm(df, x, y,departamento):
     fig = px.line(data, x=x, y=y, title="DESERCION MEDIA EN "+departamento.upper())
     fig.update_traces(line_color='red')
     return fig, data
+if radio_button_grafica == opciones[0]:
+    plot1, d = plot_dt(datos_agrupados_departamento_dt, "AÑO", "DESERCIÓN_TRANSICIÓN", opcion_departamento)
+    plot2, d = plot_dp(datos_agrupados_departamento_dp, "AÑO", "DESERCIÓN_PRIMARIA", opcion_departamento)
+    colum1,colum2 =st.columns(2)
+    colum1.plotly_chart(plot1, use_container_width=True)
+    colum2.plotly_chart(plot2, use_container_width=True)
 
-plot1, d = plot_dt(datos_agrupados_departamento_dt, "AÑO", "DESERCIÓN_TRANSICIÓN", opcion_departamento)
-plot2, d = plot_dp(datos_agrupados_departamento_dp, "AÑO", "DESERCIÓN_PRIMARIA", opcion_departamento)
-colum1,colum2 =st.columns(2)
-colum1.plotly_chart(plot1, use_container_width=True)
-colum2.plotly_chart(plot2, use_container_width=True)
+    st.markdown("---")
 
-st.markdown("---")
+    plot3, d = plot_ds(datos_agrupados_departamento_ds, "AÑO", "DESERCIÓN_SECUNDARIA", opcion_departamento)
+    plot4, d = plot_dm(datos_agrupados_departamento_dm, "AÑO", "DESERCIÓN_MEDIA", opcion_departamento)
+    colum3,colum4 =st.columns(2)
+    colum3.plotly_chart(plot3, use_container_width=True)
+    colum4.plotly_chart(plot4, use_container_width=True)
 
-plot3, d = plot_ds(datos_agrupados_departamento_ds, "AÑO", "DESERCIÓN_SECUNDARIA", opcion_departamento)
-plot4, d = plot_dm(datos_agrupados_departamento_dm, "AÑO", "DESERCIÓN_MEDIA", opcion_departamento)
-colum3,colum4 =st.columns(2)
-colum3.plotly_chart(plot3, use_container_width=True)
-colum4.plotly_chart(plot4, use_container_width=True)
+    st.markdown("---")
 
-st.markdown("---")
+elif radio_button_grafica == opciones[1]:
 
-Figura1 = go.Figure()
-MyColors = ["#e8eefc", "#d0dcf9", "#b7ccf6", "#9dbbf2", "#81abef", "#609beb", "#318ce7"]
-Temp = participacion.transpose()
-for i, color in zip(Temp.columns, MyColors):
-    Figura1.add_bar(x = Temp.index, y = Temp[i], marker_color = color, name = i)
 
-Figura1.update_layout(
-    # Usando una tema por defecto (https://plotly.com/python/templates/)
-    template = "plotly_dark",
-    # Personalización de Títulos
-    title_text = "PARTICIPACIÓN OBTENIDA POR DEPARTAMENTO",
-    # Personalización de Ejes
-    xaxis = dict(
-        tickmode = "array",
-        tickvals = [0, 1, 2],
-        ticktext = ["Cobertura Neta","Tasa de Matriculación"]
+    Figura1 = go.Figure()
+    MyColors = ["#e8eefc", "#d0dcf9", "#b7ccf6", "#9dbbf2", "#81abef", "#609beb", "#318ce7"]
+    Temp = participacion.transpose()
+    for i, color in zip(Temp.columns, MyColors):
+        Figura1.add_bar(x = Temp.index, y = Temp[i], marker_color = color, name = i)
+
+    Figura1.update_layout(
+        # Usando una tema por defecto (https://plotly.com/python/templates/)
+        template = "plotly_dark",
+        # Personalización de Títulos
+        title_text = "COMPARACION ENTRE COBERTURA NETA Y TASA DE MATRICULACION/DEPARTAMENTOS",
+        # Personalización de Ejes
+        xaxis = dict(
+            tickmode = "array",
+            tickvals = [0, 1, 2],
+            ticktext = ["Cobertura Neta","Tasa de Matriculación"]
+        )
+    )    
+    Figura1.update_xaxes(
+        title_text = "Variable",
+        #title_font = dict(size = 20, family = "Balto", color = "#28F618"),
+        # Tickes
+        tickangle = 0,
+        tickfont = dict(size = 16, family = "Overpass", color = "#FFFFFF"),
+        # Línea Base
+        showline = True, linewidth = 2, linecolor = "#FFFFFF",
     )
-)    
-Figura1.update_xaxes(
-    title_text = "Variable",
-    #title_font = dict(size = 20, family = "Balto", color = "#28F618"),
-    # Tickes
-    tickangle = 0,
-    tickfont = dict(size = 16, family = "Overpass", color = "#FFFFFF"),
-    # Línea Base
-    showline = True, linewidth = 2, linecolor = "#FFFFFF",
-)
-Figura1.update_yaxes(
-    tickformat = "%",    
-    tickfont = dict(size = 16, family = "Overpass", color = "#FFFFFF"),
-    showline = True, linewidth = 2, linecolor = "#FFFFFF", mirror = True
-)
-st.plotly_chart(Figura1, use_container_width=True)
+    Figura1.update_yaxes(
+        tickformat = "%",    
+        tickfont = dict(size = 16, family = "Overpass", color = "#FFFFFF"),
+        showline = True, linewidth = 2, linecolor = "#FFFFFF", mirror = True
+    )
+    st.plotly_chart(Figura1, use_container_width=True)
 
-st.markdown("---")
+    st.markdown("---")
+elif radio_button_grafica == opciones[2]:
+    Figura3 = go.Figure()
+    Figura3.add_scatter(
+        x = cobertura["Cobertura Neta"].index,y=cobertura["Cobertura Neta"],
+            mode = "lines", line =  dict(color = "#54C757", width = 3),
+            name = "Cobertura Neta", showlegend = True
+    )
+    Figura3.add_scatter(
+        x = cobertura["Tasa de Matriculación"].index, y = cobertura["Tasa de Matriculación"],
+            mode = "lines", line = dict(color = "#145CBA", width = 3),
+            name = "Tasa de Matriculación", showlegend = True
+    )
 
-Figura3 = go.Figure()
-Figura3.add_scatter(
-    x = cobertura["Cobertura Neta"].index,y=cobertura["Cobertura Neta"],
-        mode = "lines", line =  dict(color = "#54C757", width = 3),
-        name = "Cobertura Neta", showlegend = True
-)
-Figura3.add_scatter(
-    x = cobertura["Tasa de Matriculación"].index, y = cobertura["Tasa de Matriculación"],
-        mode = "lines", line = dict(color = "#145CBA", width = 3),
-        name = "Tasa de Matriculación", showlegend = True
-)
+    Figura3.update_traces(mode = "markers+lines", hovertemplate = None)
+    Figura3.update_layout(
+        template = "simple_white",
+        hovermode = "x", # (https://plotly.com/python/hover-text-and-formatting/)
+        title_text = "EVOLUCIÓN HISTÓRICA DE LA COBERTURA Y LA TASA DE MATRICULACIÓN<BR>EN PROMEDIO DE 2011 A 2020",
+        legend = dict(orientation = "h", yanchor = "bottom", y = 1.02, xanchor = "right", x = 1)
+    )    
+    Figura3.update_xaxes(
+        title_text = "Año",
+        title_font = dict(size = 20, family = "Rockwell"),
+        # Línea Base
+        showline = True, linewidth = 2, linecolor = "#FFFFFF",
+    )
+    Figura3.update_yaxes(
+        title_text = "Tasa (%)",
+        title_font = dict(size = 20, family = "Rockwell"),
+        # Línea Base
+        showline = True, linewidth = 2, linecolor = "#FFFFFF"
+    )
+    st.plotly_chart(Figura3, use_container_width=True)
 
-Figura3.update_traces(mode = "markers+lines", hovertemplate = None)
-Figura3.update_layout(
-    template = "simple_white",
-    hovermode = "x", # (https://plotly.com/python/hover-text-and-formatting/)
-    title_text = "EVOLUCIÓN HISTÓRICA DE LA COBERTURA NETA Y LA TASA DE MATRICULACIÓN<BR>EN PROMEDIO DE 2011 A 2020",
-    legend = dict(orientation = "h", yanchor = "bottom", y = 1.02, xanchor = "right", x = 1)
-)    
-Figura3.update_xaxes(
-    title_text = "Año",
-    title_font = dict(size = 20, family = "Rockwell"),
-    # Línea Base
-    showline = True, linewidth = 2, linecolor = "#FFFFFF",
-)
-Figura3.update_yaxes(
-    title_text = "Tasa (%)",
-    title_font = dict(size = 20, family = "Rockwell"),
-    # Línea Base
-    showline = True, linewidth = 2, linecolor = "#FFFFFF"
-)
-st.plotly_chart(Figura3, use_container_width=True)
+    st.markdown("---")
+elif radio_button_grafica == opciones[3]:
 
-st.markdown("---")
-
-Figura4 = px.pie(sedes_conectadas, values="SEDES_CONECTADAS_A_INTERNET", names="DEPARTAMENTO", 
-             color_discrete_sequence=px.colors.sequential.RdBu,
-             opacity=1, hole=0.3, title="PORCENTAJE DE SEDES CONECTADAS A INTERNET POR DEPARTAMENTO")
-Figura4.update_traces(textinfo="value")
-st.plotly_chart(Figura4, use_container_width=True)
+    Figura4 = px.pie(sedes_conectadas, values="SEDES_CONECTADAS_A_INTERNET", names="DEPARTAMENTO", 
+                color_discrete_sequence=px.colors.sequential.RdBu,
+                opacity=1, hole=0.3, title="PORCENTAJE DE SEDES CONECTADAS A INTERNET POR DEPARTAMENTO")
+    Figura4.update_traces(textinfo="value")
+    st.plotly_chart(Figura4, use_container_width=True)
+    st.markdown("---")
 
 
