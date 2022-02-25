@@ -9,9 +9,9 @@ import plotly.graph_objects as go
 st.set_page_config(layout="wide")
 
 st.header("DASHBOARD")
-st.sidebar.header("ESTADISTICA DE EDUCACION POR MUNICIPIO")
+st.sidebar.header("ESTADISTICA DE EDUCACION POR DEPARTAMENTO")
 st.sidebar.markdown("---")
-st.markdown("# APARTADO DE GRAFICAS Y TABLAS")
+st.markdown("# TABLA Y GRAFICOS")
 servidor = 'http://ec2-44-198-126-182.compute-1.amazonaws.com'
 
 @st.cache
@@ -110,28 +110,28 @@ st.markdown("---")
 def plot_dp(df, x, y,departamento):
     data = df.copy()   
     data = data[data["DEPARTAMENTO"] == departamento]
-    fig = px.line(data, x=x, y=y, title="MEDIA DE DESERCION EN PRIMARIA EN "+departamento.upper())
+    fig = px.line(data, x=x, y=y, title="DESERCION PRIMARIA EN "+departamento.upper())
     fig.update_traces(line_color='red')
     return fig, data
 
 def plot_dt(df, x, y,departamento):
     data = df.copy()   
     data = data[data["DEPARTAMENTO"] == departamento]
-    fig = px.line(data, x=x, y=y, title="MEDIA DE DESERCION EN TRANSICION EN "+departamento.upper())
+    fig = px.line(data, x=x, y=y, title="DESERCION TRANSICION EN "+departamento.upper())
     fig.update_traces(line_color='red')
     return fig, data
 
 def plot_ds(df, x, y,departamento):
     data = df.copy()   
     data = data[data["DEPARTAMENTO"] == departamento]
-    fig = px.line(data, x=x, y=y, title="MEDIA DE DESERCION EN SECUNDARIA EN "+departamento.upper())
+    fig = px.line(data, x=x, y=y, title="DESERCION SECUNDARIA EN "+departamento.upper())
     fig.update_traces(line_color='red')
     return fig, data
 
 def plot_dm(df, x, y,departamento):
     data = df.copy()   
     data = data[data["DEPARTAMENTO"] == departamento]
-    fig = px.line(data, x=x, y=y, title="MEDIA DE LA DESERCION MEDIA EN "+departamento.upper())
+    fig = px.line(data, x=x, y=y, title="DESERCION MEDIA EN "+departamento.upper())
     fig.update_traces(line_color='red')
     return fig, data
 
@@ -203,7 +203,7 @@ Figura3.update_traces(mode = "markers+lines", hovertemplate = None)
 Figura3.update_layout(
     template = "simple_white",
     hovermode = "x", # (https://plotly.com/python/hover-text-and-formatting/)
-    title_text = "EVOLUCIÓN HISTÓRICA DE LA COBERTURA Y LA TASA DE MATRICULACIÓN<BR>EN PROMEDIO DE 2011 A 2020",
+    title_text = "EVOLUCIÓN HISTÓRICA DE LA COBERTURA NETA Y LA TASA DE MATRICULACIÓN<BR>EN PROMEDIO DE 2011 A 2020",
     legend = dict(orientation = "h", yanchor = "bottom", y = 1.02, xanchor = "right", x = 1)
 )    
 Figura3.update_xaxes(
