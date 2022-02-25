@@ -1,6 +1,10 @@
+from pandas import json_normalize
 import streamlit as st
 import pandas as pd
 import plotly.express as px
+import requests
+import json
+import plotly.graph_objects as go
 
 st.set_page_config(layout="wide")
 
@@ -8,86 +12,127 @@ st.header("DASHBOARD")
 st.sidebar.header("ESTADISTICA DE EDUCACION POR MUNICIPIO")
 st.sidebar.markdown("---")
 st.markdown("# APARTADO DE GRAFICAS Y TABLAS")
-
-
+servidor = 'http://ec2-44-198-126-182.compute-1.amazonaws.com'
 
 @st.cache
-def cargar_datos(filename: str):
-    return pd.read_csv(filename)
+def cargar_datos():
+    response = requests.get(servidor + '/datos')
+    info = json.loads(response.text)    
+    datos = json_normalize(info)
+    return datos
+
+def get_desersion_transicion():
+    response = requests.get(servidor + '/desercion_transicion')
+    info = json.loads(response.text)    
+    datos = json_normalize(info)
+    return datos
+
+def get_desersion_primaria():
+    response = requests.get(servidor + '/desercion_primaria')
+    info = json.loads(response.text)    
+    datos = json_normalize(info)
+    return datos
+
+def get_desersion_secundaria():
+    response = requests.get(servidor + '/desercion_secundaria')
+    info = json.loads(response.text)    
+    datos = json_normalize(info)
+    return datos
+
+def get_desersion_media():
+    response = requests.get(servidor + '/desercion_media')
+    info = json.loads(response.text)    
+    datos = json_normalize(info)
+    return datos
+
+def get_participacion():
+    response = requests.get(servidor + '/participacion')
+    info = json.loads(response.text)    
+    info = json.dumps(info)
+    datos = pd.read_json(info, orient='index')
+    return datos
+
+def get_cobertura():
+    response = requests.get(servidor + '/cobertura')
+    info = json.loads(response.text)    
+    info = json.dumps(info)
+    datos = pd.read_json(info, orient='index')
+    return datos
+
+def get_conectadas():
+    response = requests.get(servidor + '/sedes_conectadas')
+    info = json.loads(response.text)    
+    datos = json_normalize(info)
+    return datos
+
+datos = cargar_datos()
+participacion = get_participacion()
+cobertura = get_cobertura()
+radio_button = st.sidebar.radio(
+    label="Tabla de datos", options=["Mostrar", "No mostrar"]
+)
+
+if radio_button == "Mostrar":
+    st.dataframe(datos)
 
 
-datos = cargar_datos("datos.csv")
+datos_agrupados_departamento_dt = get_desersion_transicion()
+datos_agrupados_departamento_dt[['DESERCIÓN_TRANSICIÓN']] = datos_agrupados_departamento_dt[['DESERCIÓN_TRANSICIÓN']].astype(float)
+datos_agrupados_departamento_dt[['AÑO']] = datos_agrupados_departamento_dt[['AÑO']].astype(int)
+
+datos_agrupados_departamento_dp = get_desersion_primaria()
+datos_agrupados_departamento_dp[['DESERCIÓN_PRIMARIA']] = datos_agrupados_departamento_dp[['DESERCIÓN_PRIMARIA']].astype(float)
+datos_agrupados_departamento_dp[['AÑO']] = datos_agrupados_departamento_dp[['AÑO']].astype(int)
+
+datos_agrupados_departamento_ds = get_desersion_secundaria()
+datos_agrupados_departamento_ds[['DESERCIÓN_SECUNDARIA']] = datos_agrupados_departamento_ds[['DESERCIÓN_SECUNDARIA']].astype(float)
+datos_agrupados_departamento_ds[['AÑO']] = datos_agrupados_departamento_ds[['AÑO']].astype(int)
+
+datos_agrupados_departamento_dm = get_desersion_media()
+datos_agrupados_departamento_dm[['DESERCIÓN_MEDIA']] = datos_agrupados_departamento_dm[['DESERCIÓN_MEDIA']].astype(float)
+datos_agrupados_departamento_dm[['AÑO']] = datos_agrupados_departamento_dm[['AÑO']].astype(int)
+
+sedes_conectadas = get_conectadas()
+sedes_conectadas[['SEDES_CONECTADAS_A_INTERNET']] = sedes_conectadas[['SEDES_CONECTADAS_A_INTERNET']].astype(float)
+sedes_conectadas[['SEDES_CONECTADAS_A_INTERNET']] = round(sedes_conectadas[['SEDES_CONECTADAS_A_INTERNET']], 2)
 
 
-#ACCION DEL BOTON
-# if cargo_datos:
-#     st.write("Estoy cargando datos (pero no)")
+lista_departamentos = requests.get(servidor + '/departamentos')
+lista_departamentos = json.loads(lista_departamentos.text)
 
-
-datos_agrupados_departamento = datos.groupby(["DEPARTAMENTO"]).mean().reset_index().copy()
-datos_agrupados_año = datos.groupby(["AÑO"]).mean().reset_index().copy()
-datos_agrupados_departamento_dt = datos.groupby(["AÑO","DEPARTAMENTO"])['DESERCIÓN_TRANSICIÓN'].mean().reset_index().copy()
-datos_agrupados_departamento_dp = datos.groupby(["AÑO","DEPARTAMENTO"])['DESERCIÓN_PRIMARIA'].mean().reset_index().copy()
-datos_agrupados_departamento_ds = datos.groupby(["AÑO","DEPARTAMENTO"])['DESERCIÓN_SECUNDARIA'].mean().reset_index().copy()
-datos_agrupados_departamento_dm = datos.groupby(["AÑO","DEPARTAMENTO"])['DESERCIÓN_MEDIA'].mean().reset_index().copy()
-
-
-st.dataframe(datos)
-
-lista_departamentos = list(datos_agrupados_departamento["DEPARTAMENTO"].unique())
-lista_anios = list(datos_agrupados_año["AÑO"].unique())
-# st.write((lista_departamentos))
 opcion_departamento = st.sidebar.selectbox(
     label="Seleccione un departamento", options=lista_departamentos
 )
 
-# opcion_anio = st.sidebar.selectbox(
-#     label="Seleccione un un año", options=lista_anios
-# )
+
 st.markdown("---")
-# st.dataframe(datos_agrupados_departamento[datos_agrupados_departamento["DEPARTAMENTO"] == opcion_departamento])
 
-otras_variables = list(datos.columns)
-otras_variables.pop(otras_variables.index("DEPARTAMENTO"))
-otras_variables.pop(otras_variables.index("AÑO"))
-# opcion_y = st.sidebar.selectbox(
-#     label="Seleccione una variable", options=otras_variables
-# )
-
-
-# @st.cache
-# def plot_simple(df, x, y, sales_filter):
-#     data = df.copy()
-#     data = data[data["DEPARTAMENTO"] == sales_filter]
-#     fig = px.line(data, x=x, y=y)
-#     return fig, data
-
-# plot, d = plot_simple(datos, "DEPARTAMENTO", opcion_y, opcion_departamento)
-# st.plotly_chart(plot)
-# st.write(d)
-
-# @st.cache
-# def plot_anio(df, x, y, año):
-#     data = df.copy()
-#     data = data[data["AÑO"] == año]
-#     fig = px.line(data, x=x, y=y)
-#     return fig, data
-
-# plot, d = plot_anio(datos, opcion_y, "AÑO", opcion_anio)
-# st.plotly_chart(plot)
-# st.write(d)
-@st.cache
 def plot_dp(df, x, y,departamento):
     data = df.copy()   
     data = data[data["DEPARTAMENTO"] == departamento]
     fig = px.line(data, x=x, y=y, title="MEDIA DE DESERCION EN PRIMARIA EN "+departamento.upper())
+    fig.update_traces(line_color='red')
     return fig, data
 
-@st.cache
 def plot_dt(df, x, y,departamento):
     data = df.copy()   
     data = data[data["DEPARTAMENTO"] == departamento]
     fig = px.line(data, x=x, y=y, title="MEDIA DE DESERCION EN TRANSICION EN "+departamento.upper())
+    fig.update_traces(line_color='red')
+    return fig, data
+
+def plot_ds(df, x, y,departamento):
+    data = df.copy()   
+    data = data[data["DEPARTAMENTO"] == departamento]
+    fig = px.line(data, x=x, y=y, title="MEDIA DE DESERCION EN SECUNDARIA EN "+departamento.upper())
+    fig.update_traces(line_color='red')
+    return fig, data
+
+def plot_dm(df, x, y,departamento):
+    data = df.copy()   
+    data = data[data["DEPARTAMENTO"] == departamento]
+    fig = px.line(data, x=x, y=y, title="MEDIA DE LA DESERCION MEDIA EN "+departamento.upper())
+    fig.update_traces(line_color='red')
     return fig, data
 
 plot1, d = plot_dt(datos_agrupados_departamento_dt, "AÑO", "DESERCIÓN_TRANSICIÓN", opcion_departamento)
@@ -95,40 +140,92 @@ plot2, d = plot_dp(datos_agrupados_departamento_dp, "AÑO", "DESERCIÓN_PRIMARIA
 colum1,colum2 =st.columns(2)
 colum1.plotly_chart(plot1, use_container_width=True)
 colum2.plotly_chart(plot2, use_container_width=True)
-st.write(d)
 
 st.markdown("---")
 
-
-
-
-
-
-
-st.markdown("---")
-
-@st.cache
-def plot_ds(df, x, y,departamento):
-    data = df.copy()   
-    data = data[data["DEPARTAMENTO"] == departamento]
-    fig = px.line(data, x=x, y=y, title="MEDIA DE DESERCION EN SECUNDARIA EN "+departamento.upper())
-    return fig, data
-
-plot, d = plot_ds(datos_agrupados_departamento_ds, "AÑO", "DESERCIÓN_SECUNDARIA", opcion_departamento)
-st.plotly_chart(plot)
-st.write(d)
+plot3, d = plot_ds(datos_agrupados_departamento_ds, "AÑO", "DESERCIÓN_SECUNDARIA", opcion_departamento)
+plot4, d = plot_dm(datos_agrupados_departamento_dm, "AÑO", "DESERCIÓN_MEDIA", opcion_departamento)
+colum3,colum4 =st.columns(2)
+colum3.plotly_chart(plot3, use_container_width=True)
+colum4.plotly_chart(plot4, use_container_width=True)
 
 st.markdown("---")
 
-@st.cache
-def plot_dm(df, x, y,departamento):
-    data = df.copy()   
-    data = data[data["DEPARTAMENTO"] == departamento]
-    fig = px.line(data, x=x, y=y, title="MEDIA DE LA DESERCION MEDIA EN "+departamento.upper())
-    return fig, data
+Figura1 = go.Figure()
+MyColors = ["#e8eefc", "#d0dcf9", "#b7ccf6", "#9dbbf2", "#81abef", "#609beb", "#318ce7"]
+Temp = participacion.transpose()
+for i, color in zip(Temp.columns, MyColors):
+    Figura1.add_bar(x = Temp.index, y = Temp[i], marker_color = color, name = i)
 
-plot, d = plot_dm(datos_agrupados_departamento_dm, "AÑO", "DESERCIÓN_MEDIA", opcion_departamento)
-st.plotly_chart(plot)
-st.write(d)
+Figura1.update_layout(
+    # Usando una tema por defecto (https://plotly.com/python/templates/)
+    template = "plotly_dark",
+    # Personalización de Títulos
+    title_text = "PARTICIPACIÓN OBTENIDA POR DEPARTAMENTO",
+    # Personalización de Ejes
+    xaxis = dict(
+        tickmode = "array",
+        tickvals = [0, 1, 2],
+        ticktext = ["Cobertura Neta","Tasa de Matriculación"]
+    )
+)    
+Figura1.update_xaxes(
+    title_text = "Variable",
+    #title_font = dict(size = 20, family = "Balto", color = "#28F618"),
+    # Tickes
+    tickangle = 0,
+    tickfont = dict(size = 16, family = "Overpass", color = "#FFFFFF"),
+    # Línea Base
+    showline = True, linewidth = 2, linecolor = "#FFFFFF",
+)
+Figura1.update_yaxes(
+    tickformat = "%",    
+    tickfont = dict(size = 16, family = "Overpass", color = "#FFFFFF"),
+    showline = True, linewidth = 2, linecolor = "#FFFFFF", mirror = True
+)
+st.plotly_chart(Figura1, use_container_width=True)
+
+st.markdown("---")
+
+Figura3 = go.Figure()
+Figura3.add_scatter(
+    x = cobertura["Cobertura Neta"].index,y=cobertura["Cobertura Neta"],
+        mode = "lines", line =  dict(color = "#54C757", width = 3),
+        name = "Cobertura Neta", showlegend = True
+)
+Figura3.add_scatter(
+    x = cobertura["Tasa de Matriculación"].index, y = cobertura["Tasa de Matriculación"],
+        mode = "lines", line = dict(color = "#145CBA", width = 3),
+        name = "Tasa de Matriculación", showlegend = True
+)
+
+Figura3.update_traces(mode = "markers+lines", hovertemplate = None)
+Figura3.update_layout(
+    template = "simple_white",
+    hovermode = "x", # (https://plotly.com/python/hover-text-and-formatting/)
+    title_text = "EVOLUCIÓN HISTÓRICA DE LA COBERTURA Y LA TASA DE MATRICULACIÓN<BR>EN PROMEDIO DE 2011 A 2020",
+    legend = dict(orientation = "h", yanchor = "bottom", y = 1.02, xanchor = "right", x = 1)
+)    
+Figura3.update_xaxes(
+    title_text = "Año",
+    title_font = dict(size = 20, family = "Rockwell"),
+    # Línea Base
+    showline = True, linewidth = 2, linecolor = "#FFFFFF",
+)
+Figura3.update_yaxes(
+    title_text = "Tasa (%)",
+    title_font = dict(size = 20, family = "Rockwell"),
+    # Línea Base
+    showline = True, linewidth = 2, linecolor = "#FFFFFF"
+)
+st.plotly_chart(Figura3, use_container_width=True)
+
+st.markdown("---")
+
+Figura4 = px.pie(sedes_conectadas, values="SEDES_CONECTADAS_A_INTERNET", names="DEPARTAMENTO", 
+             color_discrete_sequence=px.colors.sequential.RdBu,
+             opacity=1, hole=0.3, title="PORCENTAJE DE SEDES CONECTADAS A INTERNET POR DEPARTAMENTO")
+Figura4.update_traces(textinfo="value")
+st.plotly_chart(Figura4, use_container_width=True)
 
 
