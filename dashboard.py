@@ -105,19 +105,14 @@ opcion_departamento = st.sidebar.selectbox(
     label="Seleccione un departamento", options=lista_departamentos
 )
 
-opciones = ["Desercion",
+opciones = ["Desercion por niveles de educacion",
             "Comparacion entre cobertura neta y T.de matriculacion", 
-            "Evolución de cobertura y tasa de matriculación",
+            "Evolución de cobertura neta y tasa de matriculación",
             "Sedes conectadas a internet por departamento"]
 
 radio_button_grafica = st.sidebar.radio(
     label="Ver graficas", options=opciones
 )
-
-# if radio_button == "Mostrar":
-#     st.dataframe(datos)
-
-
 
 st.markdown("---")
 
@@ -125,28 +120,28 @@ def plot_dp(df, x, y,departamento):
     data = df.copy()   
     data = data[data["DEPARTAMENTO"] == departamento]
     fig = px.line(data, x=x, y=y, title="DESERCION PRIMARIA EN "+departamento.upper())
-    fig.update_traces(line_color='red')
+    fig.update_traces(line_color='#f4a582')
     return fig, data
 
 def plot_dt(df, x, y,departamento):
     data = df.copy()   
     data = data[data["DEPARTAMENTO"] == departamento]
     fig = px.line(data, x=x, y=y, title="DESERCION TRANSICION EN "+departamento.upper())
-    fig.update_traces(line_color='red')
+    fig.update_traces(line_color='#f4a582')
     return fig, data
 
 def plot_ds(df, x, y,departamento):
     data = df.copy()   
     data = data[data["DEPARTAMENTO"] == departamento]
     fig = px.line(data, x=x, y=y, title="DESERCION SECUNDARIA EN "+departamento.upper())
-    fig.update_traces(line_color='red')
+    fig.update_traces(line_color='#f4a582')
     return fig, data
 
 def plot_dm(df, x, y,departamento):
     data = df.copy()   
     data = data[data["DEPARTAMENTO"] == departamento]
     fig = px.line(data, x=x, y=y, title="DESERCION MEDIA EN "+departamento.upper())
-    fig.update_traces(line_color='red')
+    fig.update_traces(line_color='#f4a582')
     return fig, data
 if radio_button_grafica == opciones[0]:
     plot1, d = plot_dt(datos_agrupados_departamento_dt, "AÑO", "DESERCIÓN_TRANSICIÓN", opcion_departamento)
@@ -169,7 +164,7 @@ elif radio_button_grafica == opciones[1]:
 
 
     Figura1 = go.Figure()
-    MyColors = ["#e8eefc", "#d0dcf9", "#b7ccf6", "#9dbbf2", "#81abef", "#609beb", "#318ce7"]
+    MyColors = ["#d1e5f0", "#f7f7f7", "#fddbc7", "#f4a582", "#d6604d", "#b2182b", "#67001f"]
     Temp = participacion.transpose()
     for i, color in zip(Temp.columns, MyColors):
         Figura1.add_bar(x = Temp.index, y = Temp[i], marker_color = color, name = i)
@@ -207,12 +202,12 @@ elif radio_button_grafica == opciones[2]:
     Figura3 = go.Figure()
     Figura3.add_scatter(
         x = cobertura["Cobertura Neta"].index,y=cobertura["Cobertura Neta"],
-            mode = "lines", line =  dict(color = "#54C757", width = 3),
+            mode = "lines", line =  dict(color = "#b2182b", width = 3),
             name = "Cobertura Neta", showlegend = True
     )
     Figura3.add_scatter(
         x = cobertura["Tasa de Matriculación"].index, y = cobertura["Tasa de Matriculación"],
-            mode = "lines", line = dict(color = "#145CBA", width = 3),
+            mode = "lines", line = dict(color = "#d1e5f0", width = 3),
             name = "Tasa de Matriculación", showlegend = True
     )
 
@@ -220,7 +215,7 @@ elif radio_button_grafica == opciones[2]:
     Figura3.update_layout(
         template = "simple_white",
         hovermode = "x", # (https://plotly.com/python/hover-text-and-formatting/)
-        title_text = "EVOLUCIÓN HISTÓRICA DE LA COBERTURA Y LA TASA DE MATRICULACIÓN<BR>EN PROMEDIO DE 2011 A 2020",
+        title_text = "EVOLUCIÓN HISTÓRICA DE LA COBERTURA NETA Y LA TASA DE MATRICULACIÓN<BR>EN PROMEDIO DE 2011 A 2020",
         legend = dict(orientation = "h", yanchor = "bottom", y = 1.02, xanchor = "right", x = 1)
     )    
     Figura3.update_xaxes(
