@@ -143,6 +143,7 @@ def plot_dm(df, x, y,departamento):
     fig = px.line(data, x=x, y=y, title="DESERCION MEDIA EN "+departamento.upper())
     fig.update_traces(line_color='#f4a582')
     return fig, data
+
 if radio_button_grafica == opciones[0]:
     plot1, d = plot_dt(datos_agrupados_departamento_dt, "AÑO", "DESERCIÓN_TRANSICIÓN", opcion_departamento)
     plot2, d = plot_dp(datos_agrupados_departamento_dp, "AÑO", "DESERCIÓN_PRIMARIA", opcion_departamento)
@@ -159,6 +160,11 @@ if radio_button_grafica == opciones[0]:
     colum4.plotly_chart(plot4, use_container_width=True)
 
     st.markdown("---")
+    st.write("""Desercion: Puede entenderse como el abandono del sistema escolar 
+                por parte de los estudiantes, provocado por la combinación de factores que se 
+                generan tanto al interior del sistema como en contextos de tipo social, familiar, individual y del entorno. 
+                La tasa de deserción intra-anual solo tiene en cuenta a los alumnos que abandonan la escuela durante el año escolar, ésta se complementa con la tasa de deserción interanual que calcula aquellos que desertan al terminar el año escolar.
+                """)
 
 elif radio_button_grafica == opciones[1]:
 
@@ -198,6 +204,15 @@ elif radio_button_grafica == opciones[1]:
     st.plotly_chart(Figura1, use_container_width=True)
 
     st.markdown("---")
+
+    st.write("""Covertura neta: Cantidad o porcentaje de estudiantes matriculados en el sistema educativo; 
+                sin contar los que están en extraedad (por encima de la edad correspondiente para cada grado).               
+            """)
+
+    st.write("""Tasa de matriculacion: Número de alumnos en las edades normativas inscritos para cursar el nivel
+                o tipo educativo del que se trate, respecto a la población de la misma edad, expresado en porcentaje.  
+            """)
+
 elif radio_button_grafica == opciones[2]:
     Figura3 = go.Figure()
     Figura3.add_scatter(
@@ -233,6 +248,13 @@ elif radio_button_grafica == opciones[2]:
     st.plotly_chart(Figura3, use_container_width=True)
 
     st.markdown("---")
+    st.write("""Covertura neta: Cantidad o porcentaje de estudiantes matriculados en el sistema educativo; 
+                sin contar los que están en extraedad (por encima de la edad correspondiente para cada grado).               
+            """)
+
+    st.write("""Tasa de matriculacion: Número de alumnos en las edades normativas inscritos para cursar el nivel
+                o tipo educativo del que se trate, respecto a la población de la misma edad, expresado en porcentaje.  
+            """)
 elif radio_button_grafica == opciones[3]:
 
     Figura4 = px.pie(sedes_conectadas, values="SEDES_CONECTADAS_A_INTERNET", names="DEPARTAMENTO", 
@@ -241,5 +263,7 @@ elif radio_button_grafica == opciones[3]:
     Figura4.update_traces(textinfo="value")
     st.plotly_chart(Figura4, use_container_width=True)
     st.markdown("---")
+
+
 
 
